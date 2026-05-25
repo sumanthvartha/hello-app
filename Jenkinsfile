@@ -19,7 +19,14 @@ pipeline {
                 sh 'mvn clean package'
             }
         }
-    }
+        stage('Slow Stage') {
+	    steps {
+		echo 'Simulating a long-running build...'
+		sh 'sleep 120'
+		echo 'Long stage complete'
+	    }
+	}		
+    }   
 
     post {
         success {
