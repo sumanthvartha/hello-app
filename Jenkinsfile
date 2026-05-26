@@ -5,47 +5,62 @@ pipeline {
         maven 'Maven'
     }
 
-    environment {
-        APP_NAME = 'hello-app'
-        BUILD_VERSION = "1.0.${env.BUILD_NUMBER}"
+    options {
+        timestamps()
     }
 
     stages {
         stage('Checkout') {
             steps {
-                echo "Build: ${env.BUILD_VERSION}"
-                echo "Running on: ${env.NODE_NAME}"
                 checkout scm
+                echo "Starting baseline build"
             }
         }
 
         stage('Build') {
             steps {
-                sh 'mvn clean package -DskipTests'
+                sh 'mvn clean package'
             }
         }
 
-        stage('Test') {
+        stage('Unit Tests') {
             steps {
                 sh 'mvn test'
             }
         }
 
-        stage('Quality Gate') {
+        stage('Code Analysis') {
             steps {
-                echo 'Quality gate check here...'
+                echo 'Simulating SonarQube scan...'
+                sh 'sleep 10'
+                echo 'Code Analysis complete'
             }
         }
 
-        stage('Deploy') {
+        stage('Security Scan') {
             steps {
-                echo "Deploying ${APP_NAME} version ${BUILD_VERSION}"
+                echo 'Simulating OWASP scan...'
+                sh 'sleep 12'
+                echo 'Security Scan complete'
+            }
+        }
+
+        stage('Generate Docs') {
+            steps {
+                sh 'mvn javadoc:javadoc'
+            }
+        }
+
+        stage('Package Final') {
+            steps {
+                sh 'mvn package -DskipTests'
             }
         }
     }
 
     post {
-        success { echo "SUCCESS: ${APP_NAME} ${BUILD_VERSION}" }
-        failure { echo "FAILED: Check console output" }
+        always {
+            echo "BUILD COMPLETE"
+        }
     }
 }
