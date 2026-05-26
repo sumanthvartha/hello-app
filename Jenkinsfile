@@ -13,13 +13,21 @@ pipeline {
         stage('Checkout') {
             steps {
                 checkout scm
-                echo "Starting optimized build - Optimization 1: Parallel"
+                echo "Starting optimized build - Optimization 2: Maven flags"
             }
         }
 
         stage('Build') {
             steps {
-                sh 'mvn clean package'
+                // Optimization: skip tests here (separate stage)
+                // skip javadoc, skip source jar, use 2 threads
+                sh '''
+                    mvn clean package \
+                    -DskipTests \
+                    -Dmaven.javadoc.skip=true \
+                    -Dmaven.source.skip=true \
+                    -T 2
+                '''
             }
         }
 
@@ -48,15 +56,10 @@ pipeline {
             }
         }
 
-        stage('Generate Docs') {
-            steps {
-                sh 'mvn javadoc:javadoc'
-            }
-        }
-
         stage('Package Final') {
             steps {
-                sh 'mvn package -DskipTests'
+                // Also optimized: no docs, no source jar
+                sh 'mvn package -DskipTests -Dmaven.javadoc.skip=true -T 2'
             }
         }
     }
