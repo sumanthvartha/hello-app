@@ -13,7 +13,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 checkout scm
-                echo "Starting baseline build"
+                echo "Starting optimized build - Optimization 1: Parallel"
             }
         }
 
@@ -29,19 +29,22 @@ pipeline {
             }
         }
 
-        stage('Code Analysis') {
-            steps {
-                echo 'Simulating SonarQube scan...'
-                sh 'sleep 10'
-                echo 'Code Analysis complete'
-            }
-        }
-
-        stage('Security Scan') {
-            steps {
-                echo 'Simulating OWASP scan...'
-                sh 'sleep 12'
-                echo 'Security Scan complete'
+        stage('Quality Checks') {
+            parallel {
+                stage('Code Analysis') {
+                    steps {
+                        echo 'Simulating SonarQube scan...'
+                        sh 'sleep 10'
+                        echo 'Code Analysis complete'
+                    }
+                }
+                stage('Security Scan') {
+                    steps {
+                        echo 'Simulating OWASP scan...'
+                        sh 'sleep 12'
+                        echo 'Security Scan complete'
+                    }
+                }
             }
         }
 
